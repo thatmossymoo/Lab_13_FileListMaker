@@ -16,6 +16,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 public class Main {
     public static void main(String[] args) {
         boolean done = false;
+        boolean failSafe = false;
         boolean needsToBeSaved = false;
         ArrayList<String> myArrList = new ArrayList<>();
         Scanner in = new Scanner(System.in);
@@ -52,7 +53,16 @@ public class Main {
                     needsToBeSaved = moveItem(in, myArrList);
                     break;
                 case "O":
-                    openFile();
+                    if (needsToBeSaved){
+                        failSafe = SafeInput.getYNConfirm(in, "Are you sure you want to open a new file without saving?");
+                        if (failSafe){
+                            openFile(myArrList);
+                        }else {
+                            saveFile(in, myArrList);
+                        }
+                    }else {
+                        openFile(myArrList);
+                    }
                     break;
                 case "S":
                     saveFile(in,  myArrList);
@@ -67,6 +77,11 @@ public class Main {
                 case "Q":
                     if (needsToBeSaved){
                         done = SafeInput.getYNConfirm(in, "Are you sure you want to quit without saving?");
+                        if (failSafe){
+                            done = true;
+                        }else {
+                            saveFile(in, myArrList);
+                        }
                 }else {
                         done = SafeInput.getYNConfirm(in, "Are you sure you want to quit?");
                         break;
@@ -147,7 +162,7 @@ public class Main {
         return needsToBeSaved;
     }
 
-    private static void openFile() {
+    private static void openFile(ArrayList<String> myArrList) {
         JFileChooser chooser = new JFileChooser();
         File selectedFile;
         String rec = "";
@@ -166,8 +181,12 @@ public class Main {
                         new BufferedReader(new InputStreamReader(in));
 
                 int line = 0;
+                myArrList.clear();
                 while (reader.ready()) {
                     rec = reader.readLine();
+                    line++;
+                    myArrList.add(rec);
+
                 }
                 reader.close(); // must close the file to seal it and flush buffer
 
